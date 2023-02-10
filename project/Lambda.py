@@ -1,4 +1,4 @@
-#Lambda Function 1 (Not tested)
+#Lambda Function 1 (Tested)
 
 import json
 import boto3
@@ -34,7 +34,7 @@ def lambda_handler(event, context):
         }
     }
 
-#Lambda function 2 (Not Tested)
+#Lambda function 2 (Tested)
 
 import json
 import sagemaker
@@ -42,12 +42,12 @@ import base64
 from sagemaker.serializers import IdentitySerializer
 
 # Fill this in with the name of your deployed model
-ENDPOINT = ## TODO: fill in
+ENDPOINT = "image-classification-2023-02-10-07-53-29-808"
 
 def lambda_handler(event, context):
 
     # Decode the image data
-    image = base64.b64decode(event['image_data'])
+    image = base64.b64decode(event["body"]["image_data"])
 
     # Instantiate a Predictor
     predictor = sagemaker.predictor.Predictor(
@@ -62,7 +62,7 @@ def lambda_handler(event, context):
     inferences = predictor.predict(image)
     
     # We return the data back to the Step Function    
-    event["inferences"] = inferences.decode('utf-8')
+    event["body"]["inferences"] = inferences.decode('utf-8')
     return {
         'statusCode': 200,
         'body': json.dumps(event)
@@ -78,10 +78,10 @@ THRESHOLD = .93
 def lambda_handler(event, context):
     
     # Grab the inferences from the event
-    inferences = ## TODO: fill in
+    inferences = event["body"]["inferences"]
     
     # Check if any values in our inferences are above THRESHOLD
-    meets_threshold = ## TODO: fill in
+    meets_threshold = True in (probability > THRESHOLD for probability in inferences)
     
     # If our threshold is met, pass our data back out of the
     # Step Function, else, end the Step Function with an error
